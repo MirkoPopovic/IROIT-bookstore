@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/book")
@@ -89,5 +92,29 @@ public class BookController {
         catch (Exception ex) {
             return new ResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/price")
+    public ResponseEntity<List<Book>> getBookByPrice(
+        @RequestParam(required = false) Double minPrice,
+        @RequestParam(required = false) Double maxPrice
+    ){
+        if(minPrice == null && maxPrice == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        if(minPrice == null){
+            minPrice = 0.0;
+        }
+        if(maxPrice == null){
+            maxPrice = Double.MAX_VALUE;
+        }
+
+        if(minPrice > maxPrice){
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Book> books = bookService.getBooksByPriceRange(minPrice, maxPrice);
+        return ResponseEntity.ok(books);
     }
 }
